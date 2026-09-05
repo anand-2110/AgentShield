@@ -1,19 +1,23 @@
-from datetime import datetime
-
-from action import AgentAction
+from agent import SimulatedAgent
 from policy import PolicyEngine
+from logger import EventLogger
 
 
-action = AgentAction(
-    agent_name="HR-Agent",
-    action_type="READ_FILE",
-    resource="PATROLL.csv",
-    timestamp=datetime.now(),
-    result="PENDING"
-)
+agent = SimulatedAgent("HR-Agent")
+policy_engine = PolicyEngine("configs/policies.json")
+logger = EventLogger()
 
-policy_engine = PolicyEngine()
 
-action.result = policy_engine.check(action)
+actions = [
+    agent.perform("READ_FILE", "candidate.pdf"),
+    agent.perform("READ_DATABASE", "candidates"),
+    agent.perform("READ_FILE", "payroll.csv"),
+]
 
-print(action)
+
+for action in actions:
+    action.result = policy_engine.check(action)
+    logger.log(action)
+
+
+logger.show_events()

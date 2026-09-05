@@ -1,0 +1,8 @@
+{
+    "HR-Agent": {
+        "allowed_actions": [
+            "READ_FILE:candidate.pdf",
+            "READ_DATABASE:candidates"
+        ]
+    }
+}
