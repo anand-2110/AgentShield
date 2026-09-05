@@ -1,0 +1,6 @@
+{
+    "policy_violation": 30,
+    "sensitive_resource": 40,
+    "external_communication": 30,
+    "privilege_escalation": 50
+}
