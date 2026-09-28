@@ -2,5 +2,17 @@
     "policy_violation": 30,
     "sensitive_resource": 40,
     "external_communication": 30,
-    "privilege_escalation": 50
+    "privilege_escalation": 50,
+    "behavior": {
+        "repeated_denials": {
+            "medium": {
+                "threshold": 3,
+                "risk": 30
+            },
+            "high": {
+                "threshold": 5,
+                "risk": 50
+            }
+        }
+    }
 }
