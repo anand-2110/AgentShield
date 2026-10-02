@@ -36,6 +36,22 @@ class RiskEngine:
             })
 
         return factors
+
+    def explain_incident(self, actions):
+        factors = []
+        seen = set()
+
+        for action in actions:
+            action_factors = self.explain(action)
+
+            for factor in action_factors:
+                key = (factor["type"], factor["risk"])
+
+                if key not in seen:
+                    factors.append(factor)
+                    seen.add(key)
+
+        return factors
     
     def severity(self, score):
         if score >= 90:

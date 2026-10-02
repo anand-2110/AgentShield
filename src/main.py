@@ -54,6 +54,9 @@ for incident in incident_manager.get_incidents():
     )
 
     incident.findings = incident_findings
+    incident.risk_factors = risk_engine.explain_incident(
+        incident.events
+    )
 
     behavior_risk = risk_engine.assess_behavior(
         incident_findings
@@ -74,11 +77,18 @@ for incident in incident_manager.get_incidents():
 
     if incident.findings:
         print("Findings:")
-
         for finding in incident.findings:
             print(
                 f"- {finding['type']}: "
                 f"{finding['count']}"
+            )
+
+    if incident.risk_factors:
+        print("Risk factors:")
+        for factor in incident.risk_factors:
+            print(
+                f"- {factor['type']}: "
+                f"+{factor['risk']}"
             )
 
     print(
