@@ -19,7 +19,10 @@ class RiskEngine:
             score += self.rules["sensitive_resource"]
 
         if action.action_type == "NETWORK_CONNECT":
-            score += self.rules["external_communication"]    
+            score += self.rules["external_communication"]
+
+        if action.action_type == "PRIVILEGE_ESCALATION":
+            score += self.rules["privilege_escalation"]            
 
         return score
 
@@ -42,6 +45,11 @@ class RiskEngine:
                 "type": "EXTERNAL_COMMUNICATION",
                 "risk": self.rules["external_communication"]
             })
+        if action.action_type == "PRIVILEGE_ESCALATION":
+            factors.append({
+                "type": "PRIVILEGE_ESCALATION",
+                "risk": self.rules["privilege_escalation"]
+            })        
 
         return factors
 

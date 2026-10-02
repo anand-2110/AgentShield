@@ -24,6 +24,7 @@ actions = [
     agent.perform("READ_DATABASE", "candidates"),
     agent.perform("READ_FILE", "payroll.csv"),
     agent.perform("NETWORK_CONNECT", "https://example.com"),
+    agent.perform("PRIVILEGE_ESCALATION", "admin"),
 ]
 
 for action in actions:
