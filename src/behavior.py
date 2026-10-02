@@ -34,7 +34,44 @@ class BehaviorAnalyzer:
             })
 
         return findings
+    
+    def detect_sequences(self, events, agent_name):
+        agent_events = [
+            event
+            for event in events
+            if event.agent_name == agent_name
+        ]
 
+        findings = []
+
+        sensitive_resources = {
+            "payroll.csv",
+            "employee_salary.csv",
+            "passwords.db",
+            "credentials.txt"
+        }
+
+        sensitive_access = None
+
+        for event in agent_events:
+            if event.resource in sensitive_resources:
+                sensitive_access = event
+                continue
+
+            if (
+                sensitive_access
+                and event.action_type == "NETWORK_CONNECT"
+            ):
+                findings.append({
+                    "type": "SUSPICIOUS_DATA_FLOW",
+                    "source": sensitive_access.resource,
+                    "destination": event.resource
+                })
+
+                break
+
+        return findings
+    
     def get_findings(self, agent_name):
         return self.analyze_events(
             self.events,

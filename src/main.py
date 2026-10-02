@@ -79,6 +79,13 @@ for incident in incident_manager.get_incidents():
         incident.agent_name
     )
 
+    sequence_findings = behavior_analyzer.detect_sequences(
+        incident.events,
+        incident.agent_name
+    )
+
+    incident_findings.extend(sequence_findings)
+
     incident.findings = incident_findings
     incident.risk_factors = risk_engine.explain_incident(
         incident.events
@@ -113,11 +120,18 @@ for incident in incident_manager.get_incidents():
 
     if incident.findings:
         print("Findings:")
+
         for finding in incident.findings:
-            print(
-                f"- {finding['type']}: "
-                f"{finding['count']}"
-            )
+            print(f"- {finding['type']}")
+
+            if "count" in finding:
+                print(f"  Count: {finding['count']}")
+
+            if "source" in finding:
+                print(f"  Source: {finding['source']}")
+
+            if "destination" in finding:
+                print(f"  Destination: {finding['destination']}")
 
     if incident.risk_factors:
         print("Risk factors:")
