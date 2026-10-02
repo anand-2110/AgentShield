@@ -4,5 +4,23 @@
             "READ_FILE:candidate.pdf",
             "READ_DATABASE:candidates"
         ]
+    },
+    "Finance-Agent": {
+        "allowed_actions": [
+            "READ_FILE:payroll.csv",
+            "READ_DATABASE:employees"
+        ]
+    },
+    "Support-Agent": {
+        "allowed_actions": [
+            "READ_FILE:tickets.csv",
+            "READ_DATABASE:customers"
+        ]
     }
 }
+
+
+
+
+
+

@@ -10,7 +10,11 @@ from behavior import BehaviorAnalyzer
 from incident import IncidentManager
  
 #initializing modules.
-agent = SimulatedAgent("HR-Agent")
+agents = [
+    SimulatedAgent("HR-Agent"),
+    SimulatedAgent("Finance-Agent"),
+    SimulatedAgent("Support-Agent")
+]
 policy_engine = PolicyEngine("configs/policies.json")
 logger = EventLogger()
 risk_engine = RiskEngine("configs/risk_rules.json")
@@ -20,11 +24,17 @@ incident_manager = IncidentManager()
 
 
 actions = [
-    agent.perform("READ_FILE", "candidate.pdf"),
-    agent.perform("READ_DATABASE", "candidates"),
-    agent.perform("READ_FILE", "payroll.csv"),
-    agent.perform("NETWORK_CONNECT", "https://example.com"),
-    agent.perform("PRIVILEGE_ESCALATION", "admin"),
+    agents[0].perform("READ_FILE", "candidate.pdf"),
+    agents[0].perform("READ_FILE", "payroll.csv"),
+    agents[0].perform("NETWORK_CONNECT", "https://example.com"),
+
+    agents[1].perform("READ_FILE", "payroll.csv"),
+    agents[1].perform("READ_DATABASE", "employees"),
+    agents[1].perform("PRIVILEGE_ESCALATION", "admin"),
+
+    agents[2].perform("READ_FILE", "tickets.csv"),
+    agents[2].perform("READ_DATABASE", "customers"),
+    agents[2].perform("NETWORK_CONNECT", "https://example.com")
 ]
 
 for action in actions:
@@ -109,41 +119,44 @@ for incident in incident_manager.get_incidents():
         f"({incident.severity})"
     )
 
-findings = behavior_analyzer.get_findings("HR-Agent")
+print("\nAgent behavior:")
 
-behavior_risk = risk_engine.assess_behavior(findings)
+for agent in agents:
+    findings = behavior_analyzer.get_findings(agent.name)
 
-print("\nBehavior findings:")
-for finding in findings:
-    print(finding)
+    behavior_risk = risk_engine.assess_behavior(findings)
 
-print(f"Behavior risk: {behavior_risk}")
+    print(f"\n{agent.name}")
+    print("Behavior findings:")
 
-incident_risk = risk_engine.assess_incident(
-    actions,
-    behavior_risk
-)
+    for finding in findings:
+        print(finding)
 
-incident_level = risk_engine.severity(incident_risk)
+    print(f"Behavior risk: {behavior_risk}")
 
-print(f"Incident risk: {incident_risk} ({incident_level})")
+    historical_events = storage.get_events(agent.name)
 
-historical_events = storage.get_events(agent.name)
+    historical_findings = behavior_analyzer.get_historical_findings(
+        agent.name,
+        historical_events
+    )
 
-historical_findings = behavior_analyzer.get_historical_findings(
-    agent.name,
-    historical_events
-)
+    agent_risk = risk_engine.assess_agent_risk(
+        historical_findings
+    )
 
-agent_risk = risk_engine.assess_agent_risk(historical_findings)
-agent_risk_level = risk_engine.severity(agent_risk)
+    agent_risk_level = risk_engine.severity(agent_risk)
 
-print("\nHistorical findings:")
-for finding in historical_findings:
-    print(finding)
+    print("Historical findings:")
 
-print(f"Agent Risk: {agent_risk} ({agent_risk_level})")
+    for finding in historical_findings:
+        print(finding)
 
+    print(
+        f"Agent Risk: "
+        f"{agent_risk} "
+        f"({agent_risk_level})"
+    )
 print("\nBehavior history:")
 for event in behavior_analyzer.get_events():
     print(event)
