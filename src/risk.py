@@ -18,6 +18,9 @@ class RiskEngine:
         if action.resource in self.rules["sensitive_resources"]:
             score += self.rules["sensitive_resource"]
 
+        if action.action_type == "NETWORK_CONNECT":
+            score += self.rules["external_communication"]    
+
         return score
 
     def explain(self, action):
@@ -33,6 +36,11 @@ class RiskEngine:
             factors.append({
                 "type": "SENSITIVE_RESOURCE",
                 "risk": self.rules["sensitive_resource"]
+            })
+        if action.action_type == "NETWORK_CONNECT":
+            factors.append({
+                "type": "EXTERNAL_COMMUNICATION",
+                "risk": self.rules["external_communication"]
             })
 
         return factors

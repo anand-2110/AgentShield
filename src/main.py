@@ -23,6 +23,7 @@ actions = [
     agent.perform("READ_FILE", "candidate.pdf"),
     agent.perform("READ_DATABASE", "candidates"),
     agent.perform("READ_FILE", "payroll.csv"),
+    agent.perform("NETWORK_CONNECT", "https://example.com"),
 ]
 
 for action in actions:
