@@ -11,3 +11,6 @@ class AgentConfigLoader:
 
     def get_actions(self, agent_name):
         return self.config[agent_name]["actions"]
+
+    def get_scenario(self, agent_name):
+        return self.config[agent_name]["scenario"]

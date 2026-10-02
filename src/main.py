@@ -30,6 +30,15 @@ incident_manager = IncidentManager()
 actions = []
 
 for agent in agents:
+    scenario = config_loader.get_scenario(
+        agent.name
+    )
+
+    print(
+        f"\nSimulating {agent.name} "
+        f"[{scenario}]"
+    )
+
     agent_actions = config_loader.get_actions(
         agent.name
     )

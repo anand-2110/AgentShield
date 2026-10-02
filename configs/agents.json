@@ -1,5 +1,6 @@
 {
     "HR-Agent": {
+        "scenario": "DATA_EXFILTRATION",
         "actions": [
             {
                 "type": "READ_FILE",
@@ -16,6 +17,7 @@
         ]
     },
     "Finance-Agent": {
+        "scenario": "PRIVILEGE_ABUSE",
         "actions": [
             {
                 "type": "READ_FILE",
@@ -32,6 +34,7 @@
         ]
     },
     "Support-Agent": {
+        "scenario": "EXTERNAL_COMMUNICATION",
         "actions": [
             {
                 "type": "READ_FILE",
