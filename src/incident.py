@@ -20,8 +20,25 @@ class Incident:
     def add_event(self, action):
         self.events.append(action)
         self.end_time = action.timestamp
+    def get_timeline(self):
+        return sorted(
+            self.events,
+            key=lambda event: event.timestamp
+        )
+    def update_status(self, new_status):
+        valid_statuses = {
+            "NEW",
+            "INVESTIGATING",
+            "RESOLVED",
+            "FALSE_POSITIVE"
+        }
 
+        if new_status not in valid_statuses:
+            raise ValueError(
+                f"Invalid incident status: {new_status}"
+            )
 
+        self.status = new_status
 class IncidentManager:
 
     def __init__(self, correlation_window_seconds=60):

@@ -71,9 +71,19 @@ for incident in incident_manager.get_incidents():
     incident.severity = risk_engine.severity(incident_risk)
 
     print(f"{incident.incident_id}: {incident.agent_name}")
+    print(f"Status: {incident.status}")
     print(f"Events: {len(incident.events)}")
     print(f"Start: {incident.start_time}")
     print(f"End: {incident.end_time}")
+    print("Timeline:")
+
+    for event in incident.get_timeline():
+        print(
+            f"- {event.timestamp} | "
+            f"{event.action_type} | "
+            f"{event.resource} | "
+            f"{event.result}"
+        )
 
     if incident.findings:
         print("Findings:")
