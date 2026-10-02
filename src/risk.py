@@ -13,8 +13,11 @@ class RiskEngine:
         if action.result == "DENIED":
             score += self.rules["policy_violation"]
 
-        return score
+        if action.resource in self.rules["sensitive_resources"]:
+            score += self.rules["sensitive_resource"]
 
+        return score
+    
     def severity(self, score):
         if score >= 90:
             return "CRITICAL"

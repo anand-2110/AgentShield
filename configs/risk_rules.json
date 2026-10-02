@@ -14,5 +14,11 @@
                 "risk": 50
             }
         }
-    }
+    },
+    "sensitive_resources": [
+        "payroll.csv",
+        "employee_salary.csv",
+        "passwords.db",
+        "credentials.txt"
+    ]
 }
