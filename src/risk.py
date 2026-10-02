@@ -41,6 +41,11 @@ class RiskEngine:
                     risk += rules["medium"]["risk"]
 
         return risk
+
+    def assess_agent_risk(self, findings):
+        return self.assess_behavior(findings)
+
+
     def assess_incident(self, actions, behavior_risk):
         action_risks = []
 
