@@ -1,0 +1,50 @@
+{
+    "HR-Agent": {
+        "actions": [
+            {
+                "type": "READ_FILE",
+                "resource": "candidate.pdf"
+            },
+            {
+                "type": "READ_FILE",
+                "resource": "payroll.csv"
+            },
+            {
+                "type": "NETWORK_CONNECT",
+                "resource": "https://example.com"
+            }
+        ]
+    },
+    "Finance-Agent": {
+        "actions": [
+            {
+                "type": "READ_FILE",
+                "resource": "payroll.csv"
+            },
+            {
+                "type": "READ_DATABASE",
+                "resource": "employees"
+            },
+            {
+                "type": "PRIVILEGE_ESCALATION",
+                "resource": "admin"
+            }
+        ]
+    },
+    "Support-Agent": {
+        "actions": [
+            {
+                "type": "READ_FILE",
+                "resource": "tickets.csv"
+            },
+            {
+                "type": "READ_DATABASE",
+                "resource": "customers"
+            },
+            {
+                "type": "NETWORK_CONNECT",
+                "resource": "https://example.com"
+            }
+        ]
+    }
+}

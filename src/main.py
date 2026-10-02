@@ -8,8 +8,13 @@ from logger import EventLogger
 from storage import EventStorage
 from behavior import BehaviorAnalyzer
 from incident import IncidentManager
+from agent_config import AgentConfigLoader
  
 #initializing modules.
+config_loader = AgentConfigLoader(
+    "configs/agents.json"
+)
+
 agents = [
     SimulatedAgent("HR-Agent"),
     SimulatedAgent("Finance-Agent"),
@@ -22,20 +27,20 @@ behavior_analyzer = BehaviorAnalyzer()
 storage = EventStorage()
 incident_manager = IncidentManager()
 
+actions = []
 
-actions = [
-    agents[0].perform("READ_FILE", "candidate.pdf"),
-    agents[0].perform("READ_FILE", "payroll.csv"),
-    agents[0].perform("NETWORK_CONNECT", "https://example.com"),
+for agent in agents:
+    agent_actions = config_loader.get_actions(
+        agent.name
+    )
 
-    agents[1].perform("READ_FILE", "payroll.csv"),
-    agents[1].perform("READ_DATABASE", "employees"),
-    agents[1].perform("PRIVILEGE_ESCALATION", "admin"),
+    for action_config in agent_actions:
+        action = agent.perform(
+            action_config["type"],
+            action_config["resource"]
+        )
 
-    agents[2].perform("READ_FILE", "tickets.csv"),
-    agents[2].perform("READ_DATABASE", "customers"),
-    agents[2].perform("NETWORK_CONNECT", "https://example.com")
-]
+        actions.append(action)
 
 for action in actions:
     action.result = policy_engine.check(action)
