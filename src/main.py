@@ -52,6 +52,22 @@ incident_level = risk_engine.severity(incident_risk)
 
 print(f"Incident risk: {incident_risk} ({incident_level})")
 
+historical_events = storage.get_events(agent.name)
+
+historical_findings = behavior_analyzer.get_historical_findings(
+    agent.name,
+    historical_events
+)
+
+agent_risk = risk_engine.assess_agent_risk(historical_findings)
+agent_risk_level = risk_engine.severity(agent_risk)
+
+print("\nHistorical findings:")
+for finding in historical_findings:
+    print(finding)
+
+print(f"Agent Risk: {agent_risk} ({agent_risk_level})")
+
 print("\nBehavior history:")
 for event in behavior_analyzer.get_events():
     print(event)
