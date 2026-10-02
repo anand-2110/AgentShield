@@ -17,6 +17,23 @@ class RiskEngine:
             score += self.rules["sensitive_resource"]
 
         return score
+
+    def explain(self, action):
+        factors = []
+
+        if action.result == "DENIED":
+            factors.append({
+                "type": "POLICY_VIOLATION",
+                "risk": self.rules["policy_violation"]
+            })
+
+        if action.resource in self.rules["sensitive_resources"]:
+            factors.append({
+                "type": "SENSITIVE_RESOURCE",
+                "risk": self.rules["sensitive_resource"]
+            })
+
+        return factors
     
     def severity(self, score):
         if score >= 90:

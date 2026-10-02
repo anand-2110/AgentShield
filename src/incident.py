@@ -1,0 +1,68 @@
+from dataclasses import dataclass, field
+from datetime import datetime, timedelta
+
+
+@dataclass
+class Incident:
+    incident_id: str
+    agent_name: str
+    start_time: datetime
+    end_time: datetime
+    events: list = field(default_factory=list)
+    risk_factors: list = field(default_factory=list)
+    findings: list = field(default_factory=list)
+    incident_risk: int = 0
+    severity: str = "LOW"
+    status: str = "NEW"
+
+    def add_event(self, action):
+        self.events.append(action)
+        self.end_time = action.timestamp
+
+
+class IncidentManager:
+
+    def __init__(self, correlation_window_seconds=60):
+        self.correlation_window = timedelta(
+            seconds=correlation_window_seconds
+        )
+        self.incidents = []
+        self.next_incident_id = 1
+
+    def _create_incident(self, action):
+        incident = Incident(
+            incident_id=f"INC-{self.next_incident_id:04d}",
+            agent_name=action.agent_name,
+            start_time=action.timestamp,
+            end_time=action.timestamp,
+            events=[action]
+        )
+
+        self.next_incident_id += 1
+        self.incidents.append(incident)
+
+        return incident
+
+    def add_event(self, action):
+        if not self.incidents:
+            return self._create_incident(action)
+
+        latest_incident = self.incidents[-1]
+
+        same_agent = (
+            latest_incident.agent_name == action.agent_name
+        )
+
+        within_window = (
+            action.timestamp - latest_incident.end_time
+            <= self.correlation_window
+        )
+
+        if same_agent and within_window:
+            latest_incident.add_event(action)
+            return latest_incident
+
+        return self._create_incident(action)
+
+    def get_incidents(self):
+        return self.incidents

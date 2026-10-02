@@ -9,16 +9,13 @@ class BehaviorAnalyzer:
     def get_events(self):
         return self.events
 
-    def count_denied(self, agent_name):
-        return sum(
+    def analyze_events(self, events, agent_name):
+        denied_count = sum(
             1
-            for event in self.events
+            for event in events
             if event.agent_name == agent_name
             and event.result == "DENIED"
         )
-
-    def get_findings(self, agent_name):
-        denied_count = self.count_denied(agent_name)
 
         findings = []
 
@@ -35,6 +32,12 @@ class BehaviorAnalyzer:
             })
 
         return findings
+
+    def get_findings(self, agent_name):
+        return self.analyze_events(
+            self.events,
+            agent_name
+        )
 
     def get_historical_findings(self, agent_name, events):
         denied_count = sum(
