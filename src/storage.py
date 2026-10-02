@@ -1,5 +1,6 @@
-import sqlite3
+#History of events.
 
+import sqlite3
 
 class EventStorage:
 

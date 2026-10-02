@@ -1,3 +1,5 @@
+#Records and displayes logs.
+
 from datetime import datetime
 
 

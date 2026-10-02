@@ -1,3 +1,5 @@
+#Basically checks and evalucates if the incidents belong or join dots.
+
 from dataclasses import dataclass, field
 from datetime import datetime, timedelta
 

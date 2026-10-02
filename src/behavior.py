@@ -1,3 +1,5 @@
+#this is to look for patterns that could lead to suspicious activity
+
 class BehaviorAnalyzer:
 
     def __init__(self):

@@ -1,8 +1,7 @@
 from datetime import datetime
-
 from action import AgentAction
 
-
+#acts like the agent in question
 class SimulatedAgent:
 
     def __init__(self, name):
