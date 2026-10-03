@@ -1,6 +1,7 @@
 #This makes everything work together.
 
 #modules required
+import uuid
 from risk import RiskEngine
 from agent import SimulatedAgent
 from policy import PolicyEngine
@@ -11,6 +12,7 @@ from incident import IncidentManager
 from agent_config import AgentConfigLoader
  
 #initializing modules.
+run_id = str(uuid.uuid4())
 config_loader = AgentConfigLoader(
     "configs/agents.json"
 )
@@ -54,7 +56,7 @@ for agent in agents:
 for action in actions:
     action.result = policy_engine.check(action)
     behavior_analyzer.record(action)
-    storage.save_event(action)
+    storage.save_event(run_id, action)
     incident_manager.add_event(action)
 
     risk_score = risk_engine.assess(action)
@@ -162,11 +164,14 @@ for agent in agents:
 
     print(f"Behavior risk: {behavior_risk}")
 
-    historical_events = storage.get_events(agent.name)
-
-    historical_findings = behavior_analyzer.get_historical_findings(
+    historical_events = storage.get_events(
         agent.name,
-        historical_events
+        exclude_run_id=run_id
+    )
+
+    historical_findings = behavior_analyzer.analyze_events(
+        historical_events,
+        agent.name
     )
 
     agent_risk = risk_engine.assess_agent_risk(
