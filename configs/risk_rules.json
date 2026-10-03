@@ -4,6 +4,9 @@
     "external_communication": 30,
     "privilege_escalation": 50,
     "behavior": {
+        "historical_behavior": {
+             "within_seconds": 3600
+        },
         "repeated_denials": {
             "medium": {
                 "threshold": 3,

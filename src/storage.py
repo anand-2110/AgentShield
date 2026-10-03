@@ -51,7 +51,7 @@ class EventStorage:
         connection.commit()
         connection.close()
 
-    def get_events(self, agent_name=None, run_id=None, exclude_run_id=None):
+    def get_events(self, agent_name=None, run_id=None, exclude_run_id=None, since=None):
         connection = sqlite3.connect(self.database_file)
 
         if agent_name and run_id:
@@ -111,5 +111,11 @@ class EventStorage:
                 )
             )
 
+        if since is not None:
+            events = [
+                event
+                for event in events
+                if event.timestamp >= since
+            ]
+
         return events
-    

@@ -114,8 +114,7 @@ class BehaviorAnalyzer:
                             "description": description
                         })
 
-                        break
-
+                        source_event = None
         return findings
 
     def get_findings(self, agent_name):

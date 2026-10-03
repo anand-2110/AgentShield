@@ -11,6 +11,7 @@ from behavior import BehaviorAnalyzer
 from incident import IncidentManager
 from agent_config import AgentConfigLoader
 from incident_summary import IncidentSummary
+from datetime import datetime, timedelta
  
 #initializing modules.
 run_id = str(uuid.uuid4())
@@ -192,14 +193,31 @@ for agent in agents:
 
     print(f"Behavior risk: {behavior_risk}")
 
+    historical_window = (
+        risk_engine.rules["behavior"]["historical_behavior"]["within_seconds"]
+    )
+
+    since = datetime.now() - timedelta(
+        seconds=historical_window
+    )
+
     historical_events = storage.get_events(
         agent.name,
-        exclude_run_id=run_id
+        exclude_run_id=run_id,
+        since=since
     )
 
     historical_findings = behavior_analyzer.analyze_events(
         historical_events,
         agent.name
+    )
+    historical_sequence_findings = behavior_analyzer.detect_sequences(
+        historical_events,
+        agent.name
+    )
+
+    historical_findings.extend(
+        historical_sequence_findings
     )
 
     historical_risk = risk_engine.assess_agent_risk(
