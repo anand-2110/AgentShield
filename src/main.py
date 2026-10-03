@@ -164,7 +164,23 @@ for incident in incident_manager.get_incidents():
 print("\nAgent behavior:")
 
 for agent in agents:
-    findings = behavior_analyzer.get_findings(agent.name)
+    current_events = [
+        event
+        for event in behavior_analyzer.get_events()
+        if event.agent_name == agent.name
+    ]
+
+    findings = behavior_analyzer.analyze_events(
+        current_events,
+        agent.name
+    )
+
+    sequence_findings = behavior_analyzer.detect_sequences(
+        current_events,
+        agent.name
+    )
+
+    findings.extend(sequence_findings)
 
     behavior_risk = risk_engine.assess_behavior(findings)
 
@@ -186,9 +202,11 @@ for agent in agents:
         agent.name
     )
 
-    agent_risk = risk_engine.assess_agent_risk(
+    historical_risk = risk_engine.assess_agent_risk(
         historical_findings
     )
+
+    agent_risk = behavior_risk + historical_risk
 
     agent_risk_level = risk_engine.severity(agent_risk)
 
