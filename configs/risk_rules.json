@@ -13,6 +13,10 @@
                 "threshold": 5,
                 "risk": 50
             }
+        },
+        "findings": {
+            "SUSPICIOUS_DATA_FLOW": 40,
+            "PRIVILEGE_SENSITIVE_ACCESS": 40
         }
     },
     "sensitive_resources": [
