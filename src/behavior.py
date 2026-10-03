@@ -49,29 +49,63 @@ class BehaviorAnalyzer:
 
         findings = []
 
+        sequence_rules = self.rules["behavior_sequences"]
+
         sensitive_resources = set(
             self.rules["sensitive_resources"]
         )
 
-        sensitive_access = None
+        for sequence_rule in sequence_rules.values():
 
-        for event in agent_events:
+            source = sequence_rule["source"]
+            destination = sequence_rule["destination"]
+            finding_type = sequence_rule["finding"]
 
-            if event.resource in sensitive_resources:
-                sensitive_access = event
-                continue
+            source_event = None
 
-            if (
-                sensitive_access
-                and event.action_type == "NETWORK_CONNECT"
-            ):
-                findings.append({
-                    "type": "SUSPICIOUS_DATA_FLOW",
-                    "source": sensitive_access.resource,
-                    "destination": event.resource
-                })
+            for event in agent_events:
 
-                break
+                source_matches = False
+
+                if source["type"] == "RESOURCE":
+                    if (
+                        source["value"] == "SENSITIVE_RESOURCE"
+                        and event.resource in sensitive_resources
+                    ):
+                        source_matches = True
+
+                elif source["type"] == "ACTION":
+                    if event.action_type == source["value"]:
+                        source_matches = True
+
+                if source_matches:
+                    source_event = event
+                    continue
+
+                if source_event is None:
+                    continue
+
+                destination_matches = False
+
+                if destination["type"] == "RESOURCE":
+                    if (
+                        destination["value"] == "SENSITIVE_RESOURCE"
+                        and event.resource in sensitive_resources
+                    ):
+                        destination_matches = True
+
+                elif destination["type"] == "ACTION":
+                    if event.action_type == destination["value"]:
+                        destination_matches = True
+
+                if destination_matches:
+                    findings.append({
+                        "type": finding_type,
+                        "source": source_event.resource,
+                        "destination": event.resource
+                    })
+
+                    break
 
         return findings
 

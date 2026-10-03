@@ -20,5 +20,30 @@
         "employee_salary.csv",
         "passwords.db",
         "credentials.txt"
-    ]
+    ],
+    "behavior_sequences": {
+        "sensitive_data_flow": {
+            "source": {
+                "type": "RESOURCE",
+                "value": "SENSITIVE_RESOURCE"
+            },
+            "destination": {
+                "type": "ACTION",
+                "value": "NETWORK_CONNECT"
+            },
+            "finding": "SUSPICIOUS_DATA_FLOW"
+        },
+
+        "privilege_sensitive_access": {
+            "source": {
+                "type": "ACTION",
+                "value": "PRIVILEGE_ESCALATION"
+            },
+            "destination": {
+                "type": "RESOURCE",
+                "value": "SENSITIVE_RESOURCE"
+            },
+            "finding": "PRIVILEGE_SENSITIVE_ACCESS"
+        }
+    }
 }
