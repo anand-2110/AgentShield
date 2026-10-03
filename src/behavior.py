@@ -60,6 +60,7 @@ class BehaviorAnalyzer:
             source = sequence_rule["source"]
             destination = sequence_rule["destination"]
             finding_type = sequence_rule["finding"]
+            description = sequence_rule["description"]
 
             source_event = None
 
@@ -102,7 +103,8 @@ class BehaviorAnalyzer:
                     findings.append({
                         "type": finding_type,
                         "source": source_event.resource,
-                        "destination": event.resource
+                        "destination": event.resource,
+                        "description": description
                     })
 
                     break

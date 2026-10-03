@@ -20,7 +20,20 @@ class IncidentSummary:
 
         for finding in incident.findings:
 
-            if finding["type"] == "REPEATED_DENIALS":
+            if "description" in finding:
+                description = finding["description"]
+
+                if "source" in finding and "destination" in finding:
+                    descriptions.append(
+                        f"{description} "
+                        f"Source: {finding['source']}. "
+                        f"Destination: {finding['destination']}."
+                    )
+
+                else:
+                    descriptions.append(description)
+
+            elif finding["type"] == "REPEATED_DENIALS":
                 descriptions.append(
                     f"{incident.agent_name} generated "
                     f"{finding['count']} denied actions."
@@ -30,14 +43,6 @@ class IncidentSummary:
                 descriptions.append(
                     f"{incident.agent_name} attempted "
                     f"a restricted action."
-                )
-
-            elif finding["type"] == "SUSPICIOUS_DATA_FLOW":
-                descriptions.append(
-                    f"Sensitive data from "
-                    f"{finding['source']} was followed by "
-                    f"external communication to "
-                    f"{finding['destination']}."
                 )
 
         for factor in incident.risk_factors:
