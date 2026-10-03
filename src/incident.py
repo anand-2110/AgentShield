@@ -20,11 +20,13 @@ class Incident:
     def add_event(self, action):
         self.events.append(action)
         self.end_time = action.timestamp
+
     def get_timeline(self):
         return sorted(
             self.events,
             key=lambda event: event.timestamp
         )
+    
     def update_status(self, new_status):
         valid_statuses = {
             "NEW",
@@ -39,6 +41,7 @@ class Incident:
             )
 
         self.status = new_status
+
 class IncidentManager:
 
     def __init__(self, correlation_window_seconds=60):
@@ -63,23 +66,21 @@ class IncidentManager:
         return incident
 
     def add_event(self, action):
-        if not self.incidents:
-            return self._create_incident(action)
+        for incident in reversed(self.incidents):
 
-        latest_incident = self.incidents[-1]
+            if incident.agent_name != action.agent_name:
+                continue
 
-        same_agent = (
-            latest_incident.agent_name == action.agent_name
-        )
+            within_window = (
+                action.timestamp - incident.end_time
+                <= self.correlation_window
+            )
 
-        within_window = (
-            action.timestamp - latest_incident.end_time
-            <= self.correlation_window
-        )
+            if within_window:
+                incident.add_event(action)
+                return incident
 
-        if same_agent and within_window:
-            latest_incident.add_event(action)
-            return latest_incident
+            break
 
         return self._create_incident(action)
 

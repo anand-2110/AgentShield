@@ -10,6 +10,7 @@ from storage import EventStorage
 from behavior import BehaviorAnalyzer
 from incident import IncidentManager
 from agent_config import AgentConfigLoader
+from incident_summary import IncidentSummary
  
 #initializing modules.
 run_id = str(uuid.uuid4())
@@ -28,6 +29,7 @@ risk_engine = RiskEngine("configs/risk_rules.json")
 behavior_analyzer = BehaviorAnalyzer()
 storage = EventStorage()
 incident_manager = IncidentManager()
+summary_generator = IncidentSummary()
 
 actions = []
 
@@ -104,6 +106,16 @@ for incident in incident_manager.get_incidents():
 
     incident.incident_risk = incident_risk
     incident.severity = risk_engine.severity(incident_risk)
+    summary = summary_generator.generate(incident)
+
+    print("\nIncident Summary:")
+    print(f"ID: {summary['incident_id']}")
+    print(f"Agent: {summary['agent']}")
+    print(f"Severity: {summary['severity']}")
+    print(f"Status: {summary['status']}")
+    print(f"Risk: {summary['risk']}")
+    print(f"Events: {summary['event_count']}")
+    print(f"Summary: {summary['description']}")
 
     print(f"{incident.incident_id}: {incident.agent_name}")
     print(f"Status: {incident.status}")
