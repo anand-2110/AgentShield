@@ -32,7 +32,8 @@
                 "value": "NETWORK_CONNECT"
             },
             "finding": "SUSPICIOUS_DATA_FLOW",
-            "description": "Sensitive data was followed by external network communication."
+            "description": "Sensitive data was followed by external network communication.",
+            "within_seconds": 30
         },
 
         "privilege_sensitive_access": {
@@ -45,7 +46,8 @@
                 "value": "SENSITIVE_RESOURCE"
             },
             "finding": "PRIVILEGE_SENSITIVE_ACCESS",
-            "description": "Privilege escalation was followed by access to a sensitive resource."
+            "description": "Privilege escalation was followed by access to a sensitive resource.",
+            "within_seconds": 30
         }
     }
 }

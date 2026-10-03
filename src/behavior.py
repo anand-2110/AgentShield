@@ -61,6 +61,7 @@ class BehaviorAnalyzer:
             destination = sequence_rule["destination"]
             finding_type = sequence_rule["finding"]
             description = sequence_rule["description"]
+            within_seconds = sequence_rule["within_seconds"]
 
             source_event = None
 
@@ -100,14 +101,20 @@ class BehaviorAnalyzer:
                         destination_matches = True
 
                 if destination_matches:
-                    findings.append({
-                        "type": finding_type,
-                        "source": source_event.resource,
-                        "destination": event.resource,
-                        "description": description
-                    })
 
-                    break
+                    time_difference = (
+                        event.timestamp - source_event.timestamp
+                    ).total_seconds()
+
+                    if 0 <= time_difference <= within_seconds:
+                        findings.append({
+                            "type": finding_type,
+                            "source": source_event.resource,
+                            "destination": event.resource,
+                            "description": description
+                        })
+
+                        break
 
         return findings
 
