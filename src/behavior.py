@@ -1,8 +1,13 @@
 #this is to look for patterns that could lead to suspicious activity
 
+import json
+
 class BehaviorAnalyzer:
 
-    def __init__(self):
+    def __init__(self, rules_file):
+        with open(rules_file, "r") as file:
+            self.rules = json.load(file)
+
         self.events = []
 
     def record(self, action):
@@ -34,7 +39,7 @@ class BehaviorAnalyzer:
             })
 
         return findings
-    
+
     def detect_sequences(self, events, agent_name):
         agent_events = [
             event
@@ -44,16 +49,14 @@ class BehaviorAnalyzer:
 
         findings = []
 
-        sensitive_resources = {
-            "payroll.csv",
-            "employee_salary.csv",
-            "passwords.db",
-            "credentials.txt"
-        }
+        sensitive_resources = set(
+            self.rules["sensitive_resources"]
+        )
 
         sensitive_access = None
 
         for event in agent_events:
+
             if event.resource in sensitive_resources:
                 sensitive_access = event
                 continue
@@ -71,11 +74,10 @@ class BehaviorAnalyzer:
                 break
 
         return findings
-    
+
     def get_findings(self, agent_name):
         return self.analyze_events(
             self.events,
             agent_name
         )
-
-
+    
