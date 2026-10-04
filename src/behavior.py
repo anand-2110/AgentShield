@@ -1,6 +1,7 @@
-#this is to look for patterns that could lead to suspicious activity
+# this is to look for patterns that could lead to suspicious activity
 
 import json
+
 
 class BehaviorAnalyzer:
 
@@ -17,14 +18,24 @@ class BehaviorAnalyzer:
         return self.events
 
     def analyze_events(self, events, agent_name):
-        denied_count = sum(
-            1
+
+        agent_events = [
+            event
             for event in events
             if event.agent_name == agent_name
-            and event.result == "DENIED"
-        )
+        ]
 
         findings = []
+
+        # -----------------------------------------
+        # Repeated denied actions
+        # -----------------------------------------
+
+        denied_count = sum(
+            1
+            for event in agent_events
+            if event.result == "DENIED"
+        )
 
         if denied_count == 1:
             findings.append({
@@ -38,9 +49,38 @@ class BehaviorAnalyzer:
                 "count": denied_count
             })
 
+        # -----------------------------------------
+        # Mass data access
+        # -----------------------------------------
+
+        data_access_events = [
+            event
+            for event in agent_events
+            if event.action_type in [
+                "READ_FILE",
+                "READ_DATABASE"
+            ]
+        ]
+
+        unique_resources = set(
+            event.resource
+            for event in data_access_events
+        )
+
+        data_access_count = len(unique_resources)
+
+        data_access_rules = self.rules["behavior"]["data_access"]
+
+        if data_access_count >= data_access_rules["medium"]["threshold"]:
+            findings.append({
+                "type": "MASS_DATA_ACCESS",
+                "count": data_access_count,
+                "resources": sorted(unique_resources)
+            })
         return findings
 
     def detect_sequences(self, events, agent_name):
+
         agent_events = [
             event
             for event in events
@@ -55,12 +95,18 @@ class BehaviorAnalyzer:
             self.rules["sensitive_resources"]
         )
 
+        code_resources = set(
+            self.rules.get("code_resources", [])
+        )
+
         for sequence_rule in sequence_rules.values():
 
             source = sequence_rule["source"]
             destination = sequence_rule["destination"]
+
             finding_type = sequence_rule["finding"]
             description = sequence_rule["description"]
+
             within_seconds = sequence_rule["within_seconds"]
 
             source_event = None
@@ -69,16 +115,42 @@ class BehaviorAnalyzer:
 
                 source_matches = False
 
+                # ---------------------------------
+                # Source: RESOURCE
+                # ---------------------------------
+
                 if source["type"] == "RESOURCE":
+
                     if (
                         source["value"] == "SENSITIVE_RESOURCE"
                         and event.resource in sensitive_resources
                     ):
                         source_matches = True
 
+                # ---------------------------------
+                # Source: RESOURCE_CATEGORY
+                # ---------------------------------
+
+                elif source["type"] == "RESOURCE_CATEGORY":
+
+                    if (
+                        source["value"] == "CODE_RESOURCE"
+                        and event.resource in code_resources
+                    ):
+                        source_matches = True
+
+                # ---------------------------------
+                # Source: ACTION
+                # ---------------------------------
+
                 elif source["type"] == "ACTION":
+
                     if event.action_type == source["value"]:
                         source_matches = True
+
+                # ---------------------------------
+                # Store source event
+                # ---------------------------------
 
                 if source_matches:
                     source_event = event
@@ -87,26 +159,47 @@ class BehaviorAnalyzer:
                 if source_event is None:
                     continue
 
+                # ---------------------------------
+                # Destination matching
+                # ---------------------------------
+
                 destination_matches = False
 
                 if destination["type"] == "RESOURCE":
+
                     if (
                         destination["value"] == "SENSITIVE_RESOURCE"
                         and event.resource in sensitive_resources
                     ):
                         destination_matches = True
 
+                elif destination["type"] == "RESOURCE_CATEGORY":
+
+                    if (
+                        destination["value"] == "CODE_RESOURCE"
+                        and event.resource in code_resources
+                    ):
+                        destination_matches = True
+
                 elif destination["type"] == "ACTION":
+
                     if event.action_type == destination["value"]:
                         destination_matches = True
+
+                # ---------------------------------
+                # Check sequence timing
+                # ---------------------------------
 
                 if destination_matches:
 
                     time_difference = (
-                        event.timestamp - source_event.timestamp
+                        event.timestamp -
+                        source_event.timestamp
                     ).total_seconds()
 
-                    if 0 <= time_difference <= within_seconds:
+                    if (
+                        0 <= time_difference <= within_seconds
+                    ):
                         findings.append({
                             "type": finding_type,
                             "source": source_event.resource,
@@ -114,7 +207,9 @@ class BehaviorAnalyzer:
                             "description": description
                         })
 
+                        # Prevent reusing the same source
                         source_event = None
+
         return findings
 
     def consolidate_findings(self, findings):
@@ -141,8 +236,8 @@ class BehaviorAnalyzer:
         return list(consolidated.values())
 
     def get_findings(self, agent_name):
+
         return self.analyze_events(
             self.events,
             agent_name
         )
-    
