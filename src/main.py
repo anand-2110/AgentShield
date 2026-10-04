@@ -143,6 +143,9 @@ for incident in incident_manager.get_incidents():
         for finding in incident.findings:
             print(f"- {finding['type']}")
 
+            if "category" in finding:
+                print(f"  Category: {finding['category']}")
+
             if "count" in finding:
                 print(f"  Count: {finding['count']}")
 

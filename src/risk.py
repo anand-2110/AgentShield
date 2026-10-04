@@ -139,8 +139,9 @@ class RiskEngine:
 
             elif finding_type in behavior_finding_rules:
 
-                risk += behavior_finding_rules[finding_type]
+                finding_rule = behavior_finding_rules[finding_type]
 
+                risk += finding_rule["risk"]
         return risk
 
     def assess_agent_risk(self, findings):

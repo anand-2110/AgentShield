@@ -17,6 +17,14 @@ class BehaviorAnalyzer:
     def get_events(self):
         return self.events
 
+    def get_finding_category(self, finding_type):
+        finding_rules = self.rules["behavior"]["findings"]
+
+        if finding_type in finding_rules:
+            return finding_rules[finding_type]["category"]
+
+        return None
+
     def analyze_events(self, events, agent_name):
 
         agent_events = [
@@ -31,22 +39,40 @@ class BehaviorAnalyzer:
         # Repeated denied actions
         # -----------------------------------------
 
-        denied_count = sum(
-            1
+        denied_events = [
+            event
             for event in agent_events
             if event.result == "DENIED"
-        )
+        ]
+
+        denied_count = len(denied_events)
 
         if denied_count == 1:
             findings.append({
                 "type": "DENIED_ACTION",
-                "count": denied_count
+                "count": denied_count,
+                "description": "Agent attempted an action that was denied by policy.",
+                "evidence": [
+                    {
+                        "action_type": event.action_type,
+                        "resource": event.resource
+                    }
+                    for event in denied_events
+                ]
             })
 
         elif denied_count >= 2:
             findings.append({
                 "type": "REPEATED_DENIALS",
-                "count": denied_count
+                "count": denied_count,
+                "description": "Agent repeatedly attempted actions that were denied by policy.",
+                "evidence": [
+                    {
+                        "action_type": event.action_type,
+                        "resource": event.resource
+                    }
+                    for event in denied_events
+                ]
             })
 
         # -----------------------------------------
@@ -62,10 +88,10 @@ class BehaviorAnalyzer:
             ]
         ]
 
-        unique_resources = set(
+        unique_resources = sorted(set(
             event.resource
             for event in data_access_events
-        )
+        ))
 
         data_access_count = len(unique_resources)
 
@@ -74,9 +100,21 @@ class BehaviorAnalyzer:
         if data_access_count >= data_access_rules["medium"]["threshold"]:
             findings.append({
                 "type": "MASS_DATA_ACCESS",
+                "category": self.get_finding_category(
+                    "MASS_DATA_ACCESS"
+                ),
                 "count": data_access_count,
-                "resources": sorted(unique_resources)
+                "resources": unique_resources,
+                "description": "Agent accessed multiple unique data resources.",
+                "evidence": [
+                    {
+                        "action_type": event.action_type,
+                        "resource": event.resource
+                    }
+                    for event in data_access_events
+                ]
             })
+
         return findings
 
     def detect_sequences(self, events, agent_name):
@@ -202,9 +240,22 @@ class BehaviorAnalyzer:
                     ):
                         findings.append({
                             "type": finding_type,
+                            "category": self.get_finding_category(
+                                finding_type
+                            ),
                             "source": source_event.resource,
                             "destination": event.resource,
-                            "description": description
+                            "description": description,
+                            "evidence": [
+                                {
+                                    "action_type": source_event.action_type,
+                                    "resource": source_event.resource
+                                },
+                                {
+                                    "action_type": event.action_type,
+                                    "resource": event.resource
+                                }
+                            ]
                         })
 
                         # Prevent reusing the same source

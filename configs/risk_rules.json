@@ -32,11 +32,26 @@
         },
 
         "findings": {
-            "SUSPICIOUS_DATA_FLOW": 40,
-            "PRIVILEGE_SENSITIVE_ACCESS": 40,
-            "PRIVILEGE_EXTERNAL_COMMUNICATION": 40,
-            "CODE_EXTERNAL_COMMUNICATION": 30,
-            "MASS_DATA_ACCESS": 30
+            "SUSPICIOUS_DATA_FLOW": {
+                "risk": 40,
+                "category": "DATA_EXFILTRATION"
+            },
+            "PRIVILEGE_SENSITIVE_ACCESS": {
+                "risk": 40,
+                "category": "PRIVILEGE_ABUSE"
+            },
+            "PRIVILEGE_EXTERNAL_COMMUNICATION": {
+                "risk": 40,
+                "category": "PRIVILEGE_ABUSE"
+            },
+            "CODE_EXTERNAL_COMMUNICATION": {
+                "risk": 30,
+                "category": "CODE_ACTIVITY"
+            },
+            "MASS_DATA_ACCESS": {
+                "risk": 30,
+                "category": "DATA_ACCESS"
+            }
         }
     },
 
