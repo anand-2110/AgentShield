@@ -22,7 +22,11 @@ config_loader = AgentConfigLoader(
 agents = [
     SimulatedAgent("HR-Agent"),
     SimulatedAgent("Finance-Agent"),
-    SimulatedAgent("Support-Agent")
+    SimulatedAgent("Support-Agent"),
+    SimulatedAgent("DevOps-Agent"),
+    SimulatedAgent("Research-Agent"),
+    SimulatedAgent("Code-Agent"),
+    SimulatedAgent("Database-Agent")
 ]
 policy_engine = PolicyEngine("configs/policies.json")
 logger = EventLogger()

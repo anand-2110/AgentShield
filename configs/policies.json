@@ -5,22 +5,44 @@
             "READ_DATABASE:candidates"
         ]
     },
+
     "Finance-Agent": {
         "allowed_actions": [
             "READ_FILE:payroll.csv",
             "READ_DATABASE:employees"
         ]
     },
+
     "Support-Agent": {
         "allowed_actions": [
             "READ_FILE:tickets.csv",
             "READ_DATABASE:customers"
         ]
+    },
+
+    "DevOps-Agent": {
+        "allowed_actions": [
+            "READ_FILE:deployment.yaml"
+        ]
+    },
+
+    "Research-Agent": {
+        "allowed_actions": [
+            "READ_FILE:research_data.csv",
+            "READ_DATABASE:research_db"
+        ]
+    },
+
+    "Code-Agent": {
+        "allowed_actions": [
+            "READ_FILE:source_code.py",
+            "READ_FILE:config.py"
+        ]
+    },
+
+    "Database-Agent": {
+        "allowed_actions": [
+            "READ_DATABASE:production_db"
+        ]
     }
 }
-
-
-
-
-
-

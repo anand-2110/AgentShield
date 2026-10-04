@@ -49,5 +49,77 @@
                 "resource": "https://example.com"
             }
         ]
+    },
+    "DevOps-Agent": {
+        "scenario": "COMMAND_ABUSE",
+        "actions": [
+            {
+                "type": "READ_FILE",
+                "resource": "deployment.yaml"
+            },
+            {
+                "type": "PRIVILEGE_ESCALATION",
+                "resource": "root"
+            },
+            {
+                "type": "NETWORK_CONNECT",
+                "resource": "https://example.com"
+            }
+        ]
+    },
+    "Research-Agent": {
+        "scenario": "DATA_COLLECTION",
+        "actions": [
+            {
+                "type": "READ_FILE",
+                "resource": "research_data.csv"
+            },
+            {
+                "type": "READ_DATABASE",
+                "resource": "research_db"
+            },
+            {
+                "type": "READ_FILE",
+                "resource": "experiment_results.csv"
+            },
+            {
+                "type": "NETWORK_CONNECT",
+                "resource": "https://example.com"
+            }
+        ]
+    },
+    "Code-Agent": {
+        "scenario": "CODE_MODIFICATION",
+        "actions": [
+            {
+                "type": "READ_FILE",
+                "resource": "source_code.py"
+            },
+            {
+                "type": "READ_FILE",
+                "resource": "config.py"
+            },
+            {
+                "type": "NETWORK_CONNECT",
+                "resource": "https://example.com"
+            }
+        ]
+    },
+    "Database-Agent": {
+        "scenario": "DATA_ABUSE",
+        "actions": [
+            {
+                "type": "READ_DATABASE",
+                "resource": "production_db"
+            },
+            {
+                "type": "READ_FILE",
+                "resource": "credentials.txt"
+            },
+            {
+                "type": "NETWORK_CONNECT",
+                "resource": "https://example.com"
+            }
+        ]
     }
 }

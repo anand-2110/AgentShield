@@ -82,10 +82,15 @@ class RiskEngine:
             return "LOW"
 
     def assess_behavior(self, findings):
+
         risk = 0
 
         repeated_denial_rules = (
             self.rules["behavior"]["repeated_denials"]
+        )
+
+        data_access_rules = (
+            self.rules["behavior"]["data_access"]
         )
 
         behavior_finding_rules = (
@@ -94,17 +99,47 @@ class RiskEngine:
 
         for finding in findings:
 
-            if finding["type"] == "REPEATED_DENIALS":
+            finding_type = finding["type"]
+
+            # -----------------------------------------
+            # Repeated denied actions
+            # -----------------------------------------
+
+            if finding_type == "REPEATED_DENIALS":
+
                 count = finding["count"]
 
                 if count >= repeated_denial_rules["high"]["threshold"]:
+
                     risk += repeated_denial_rules["high"]["risk"]
 
                 elif count >= repeated_denial_rules["medium"]["threshold"]:
+
                     risk += repeated_denial_rules["medium"]["risk"]
 
-            elif finding["type"] in behavior_finding_rules:
-                risk += behavior_finding_rules[finding["type"]]
+            # -----------------------------------------
+            # Mass data access
+            # -----------------------------------------
+
+            elif finding_type == "MASS_DATA_ACCESS":
+
+                count = finding["count"]
+
+                if count >= data_access_rules["high"]["threshold"]:
+
+                    risk += data_access_rules["high"]["risk"]
+
+                elif count >= data_access_rules["medium"]["threshold"]:
+
+                    risk += data_access_rules["medium"]["risk"]
+
+            # -----------------------------------------
+            # Configured behavioral findings
+            # -----------------------------------------
+
+            elif finding_type in behavior_finding_rules:
+
+                risk += behavior_finding_rules[finding_type]
 
         return risk
 

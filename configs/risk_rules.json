@@ -3,10 +3,12 @@
     "sensitive_resource": 40,
     "external_communication": 30,
     "privilege_escalation": 50,
+
     "behavior": {
         "historical_behavior": {
-             "within_seconds": 3600
+            "within_seconds": 3600
         },
+
         "repeated_denials": {
             "medium": {
                 "threshold": 3,
@@ -17,17 +19,42 @@
                 "risk": 50
             }
         },
+
+        "data_access": {
+            "medium": {
+                "threshold": 3,
+                "risk": 20
+            },
+            "high": {
+                "threshold": 5,
+                "risk": 40
+            }
+        },
+
         "findings": {
             "SUSPICIOUS_DATA_FLOW": 40,
-            "PRIVILEGE_SENSITIVE_ACCESS": 40
+            "PRIVILEGE_SENSITIVE_ACCESS": 40,
+            "PRIVILEGE_EXTERNAL_COMMUNICATION": 40,
+            "CODE_EXTERNAL_COMMUNICATION": 30,
+            "MASS_DATA_ACCESS": 30
         }
     },
+
     "sensitive_resources": [
         "payroll.csv",
         "employee_salary.csv",
         "passwords.db",
         "credentials.txt"
     ],
+
+    "code_resources": [
+        "source_code.py",
+        "config.py",
+        "main.py",
+        "app.py",
+        "requirements.txt"
+    ],
+
     "behavior_sequences": {
         "sensitive_data_flow": {
             "source": {
@@ -54,6 +81,34 @@
             },
             "finding": "PRIVILEGE_SENSITIVE_ACCESS",
             "description": "Privilege escalation was followed by access to a sensitive resource.",
+            "within_seconds": 30
+        },
+
+        "privilege_external_communication": {
+            "source": {
+                "type": "ACTION",
+                "value": "PRIVILEGE_ESCALATION"
+            },
+            "destination": {
+                "type": "ACTION",
+                "value": "NETWORK_CONNECT"
+            },
+            "finding": "PRIVILEGE_EXTERNAL_COMMUNICATION",
+            "description": "Privilege escalation was followed by external network communication.",
+            "within_seconds": 30
+        },
+
+        "code_external_communication": {
+            "source": {
+                "type": "RESOURCE_CATEGORY",
+                "value": "CODE_RESOURCE"
+            },
+            "destination": {
+                "type": "ACTION",
+                "value": "NETWORK_CONNECT"
+            },
+            "finding": "CODE_EXTERNAL_COMMUNICATION",
+            "description": "Source code or configuration data was followed by external network communication.",
             "within_seconds": 30
         }
     }
