@@ -201,23 +201,40 @@ for agent in agents:
         seconds=historical_window
     )
 
-    historical_events = storage.get_events(
-        agent.name,
+    historical_runs = storage.get_event_runs(
+        agent_name=agent.name,
         exclude_run_id=run_id,
         since=since
     )
 
-    historical_findings = behavior_analyzer.analyze_events(
-        historical_events,
-        agent.name
-    )
-    historical_sequence_findings = behavior_analyzer.detect_sequences(
-        historical_events,
-        agent.name
-    )
+    historical_findings = []
 
-    historical_findings.extend(
-        historical_sequence_findings
+    for historical_run in historical_runs:
+
+        run_findings = behavior_analyzer.analyze_events(
+            historical_run,
+            agent.name
+        )
+
+        run_sequence_findings = (
+            behavior_analyzer.detect_sequences(
+                historical_run,
+                agent.name
+            )
+        )
+
+        run_findings.extend(
+            run_sequence_findings
+        )
+
+        historical_findings.extend(
+            run_findings
+        )
+
+    historical_findings = (
+        behavior_analyzer.consolidate_findings(
+            historical_findings
+        )
     )
 
     historical_risk = risk_engine.assess_agent_risk(
@@ -232,6 +249,8 @@ for agent in agents:
 
     for finding in historical_findings:
         print(finding)
+
+    print(f"Historical behavior risk: {historical_risk}")
 
     print(
         f"Agent Risk: "

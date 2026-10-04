@@ -119,3 +119,56 @@ class EventStorage:
             ]
 
         return events
+
+    def get_event_runs(self, agent_name=None, exclude_run_id=None, since=None):
+        connection = sqlite3.connect(self.database_file)
+
+        query = """
+            SELECT run_id, agent_name, action_type, resource, timestamp, result
+            FROM events
+            WHERE 1 = 1
+        """
+
+        parameters = []
+
+        if agent_name:
+            query += " AND agent_name = ?"
+            parameters.append(agent_name)
+
+        if exclude_run_id:
+            query += " AND run_id != ?"
+            parameters.append(exclude_run_id)
+
+        query += " ORDER BY run_id, id"
+
+        cursor = connection.execute(
+            query,
+            parameters
+        )
+
+        rows = cursor.fetchall()
+        connection.close()
+
+        runs = {}
+
+        for row in rows:
+            run_id = row[0]
+
+            event = AgentAction(
+                agent_name=row[1],
+                action_type=row[2],
+                resource=row[3],
+                timestamp=datetime.fromisoformat(row[4]),
+                result=row[5]
+            )
+
+            if since is not None and event.timestamp < since:
+                continue
+
+            if run_id not in runs:
+                runs[run_id] = []
+
+            runs[run_id].append(event)
+
+        return list(runs.values())
+    

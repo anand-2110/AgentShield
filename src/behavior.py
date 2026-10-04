@@ -117,6 +117,29 @@ class BehaviorAnalyzer:
                         source_event = None
         return findings
 
+    def consolidate_findings(self, findings):
+
+        consolidated = {}
+
+        for finding in findings:
+
+            key = (
+                finding["type"],
+                finding.get("source"),
+                finding.get("destination")
+            )
+
+            if key not in consolidated:
+
+                consolidated[key] = finding.copy()
+                consolidated[key]["occurrences"] = 1
+
+            else:
+
+                consolidated[key]["occurrences"] += 1
+
+        return list(consolidated.values())
+
     def get_findings(self, agent_name):
         return self.analyze_events(
             self.events,
