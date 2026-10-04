@@ -34,23 +34,37 @@
         "findings": {
             "SUSPICIOUS_DATA_FLOW": {
                 "risk": 40,
-                "category": "DATA_EXFILTRATION"
+                "category": "DATA_EXFILTRATION",
+                "severity": "HIGH",
+                "confidence": 0.95
             },
+
             "PRIVILEGE_SENSITIVE_ACCESS": {
                 "risk": 40,
-                "category": "PRIVILEGE_ABUSE"
+                "category": "PRIVILEGE_ABUSE",
+                "severity": "HIGH",
+                "confidence": 0.95
             },
+
             "PRIVILEGE_EXTERNAL_COMMUNICATION": {
                 "risk": 40,
-                "category": "PRIVILEGE_ABUSE"
+                "category": "PRIVILEGE_ABUSE",
+                "severity": "CRITICAL",
+                "confidence": 0.95
             },
+
             "CODE_EXTERNAL_COMMUNICATION": {
                 "risk": 30,
-                "category": "CODE_ACTIVITY"
+                "category": "CODE_ACTIVITY",
+                "severity": "HIGH",
+                "confidence": 0.90
             },
+
             "MASS_DATA_ACCESS": {
                 "risk": 30,
-                "category": "DATA_ACCESS"
+                "category": "DATA_ACCESS",
+                "severity": "HIGH",
+                "confidence": 0.90
             }
         }
     },

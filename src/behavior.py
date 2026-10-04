@@ -25,6 +25,14 @@ class BehaviorAnalyzer:
 
         return None
 
+    def get_finding_metadata(self, finding_type):
+        finding_rules = self.rules["behavior"]["findings"]
+
+        if finding_type in finding_rules:
+            return finding_rules[finding_type]
+
+        return None
+
     def analyze_events(self, events, agent_name):
 
         agent_events = [
@@ -97,12 +105,18 @@ class BehaviorAnalyzer:
 
         data_access_rules = self.rules["behavior"]["data_access"]
 
+        finding_metadata = self.get_finding_metadata(
+            "MASS_DATA_ACCESS"
+        ) or {}
+
         if data_access_count >= data_access_rules["medium"]["threshold"]:
             findings.append({
                 "type": "MASS_DATA_ACCESS",
                 "category": self.get_finding_category(
                     "MASS_DATA_ACCESS"
                 ),
+                "severity": finding_metadata.get("severity"),
+                "confidence": finding_metadata.get("confidence"),
                 "count": data_access_count,
                 "resources": unique_resources,
                 "description": "Agent accessed multiple unique data resources.",
@@ -144,6 +158,10 @@ class BehaviorAnalyzer:
 
             finding_type = sequence_rule["finding"]
             description = sequence_rule["description"]
+            
+            finding_metadata = self.get_finding_metadata(
+                finding_type
+            ) or {}
 
             within_seconds = sequence_rule["within_seconds"]
 
@@ -243,6 +261,8 @@ class BehaviorAnalyzer:
                             "category": self.get_finding_category(
                                 finding_type
                             ),
+                            "severity": finding_metadata.get("severity"),
+                            "confidence": finding_metadata.get("confidence"),
                             "source": source_event.resource,
                             "destination": event.resource,
                             "description": description,
