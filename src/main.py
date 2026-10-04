@@ -146,6 +146,12 @@ for incident in incident_manager.get_incidents():
             if "category" in finding:
                 print(f"  Category: {finding['category']}")
 
+            if "severity" in finding:
+                print(f"  Severity: {finding['severity']}")
+
+            if "confidence" in finding:
+                print(f"  Confidence: {finding['confidence']}")
+
             if "count" in finding:
                 print(f"  Count: {finding['count']}")
 
