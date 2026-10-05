@@ -2,6 +2,8 @@
 
 import json
 
+from confidence import ConfidenceEngine
+
 
 class BehaviorAnalyzer:
 
@@ -10,6 +12,7 @@ class BehaviorAnalyzer:
             self.rules = json.load(file)
 
         self.events = []
+        self.confidence_engine = ConfidenceEngine()
 
     def record(self, action):
         self.events.append(action)
@@ -32,6 +35,15 @@ class BehaviorAnalyzer:
             return finding_rules[finding_type]
 
         return None
+    
+    def apply_confidence(self, findings):
+
+        for finding in findings:
+            finding["confidence"] = (
+                self.confidence_engine.calculate(finding)
+            )
+
+        return findings
 
     def analyze_events(self, events, agent_name):
 
@@ -291,7 +303,9 @@ class BehaviorAnalyzer:
                                     "action_type": event.action_type,
                                     "resource": event.resource
                                 }
-                            ]
+                            ],
+                            "time_difference": time_difference,
+                            "within_seconds": within_seconds,
                         })
 
                         # Prevent reusing the same source

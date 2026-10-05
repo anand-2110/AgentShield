@@ -95,6 +95,10 @@ for incident in incident_manager.get_incidents():
 
     incident_findings.extend(sequence_findings)
 
+    incident_findings = behavior_analyzer.apply_confidence(
+        incident_findings
+    )
+
     incident.findings = incident_findings
     incident.risk_factors = risk_engine.explain_incident(
         incident.events
@@ -196,6 +200,10 @@ for agent in agents:
 
     findings.extend(sequence_findings)
 
+    findings = behavior_analyzer.apply_confidence(
+        findings
+    )
+
     behavior_risk = risk_engine.assess_behavior(findings)
 
     print(f"\n{agent.name}")
@@ -238,6 +246,10 @@ for agent in agents:
 
         run_findings.extend(
             run_sequence_findings
+        )
+
+        run_findings = behavior_analyzer.apply_confidence(
+            run_findings
         )
 
         historical_findings.extend(
