@@ -56,8 +56,16 @@ class BehaviorAnalyzer:
         denied_count = len(denied_events)
 
         if denied_count == 1:
+
+            finding_metadata = self.get_finding_metadata(
+                "DENIED_ACTION"
+            ) or {}
+
             findings.append({
                 "type": "DENIED_ACTION",
+                "category": finding_metadata.get("category"),
+                "severity": finding_metadata.get("severity"),
+                "confidence": finding_metadata.get("confidence"),
                 "count": denied_count,
                 "description": "Agent attempted an action that was denied by policy.",
                 "evidence": [
@@ -70,8 +78,16 @@ class BehaviorAnalyzer:
             })
 
         elif denied_count >= 2:
+
+            finding_metadata = self.get_finding_metadata(
+                "REPEATED_DENIALS"
+            ) or {}
+
             findings.append({
                 "type": "REPEATED_DENIALS",
+                "category": finding_metadata.get("category"),
+                "severity": finding_metadata.get("severity"),
+                "confidence": finding_metadata.get("confidence"),
                 "count": denied_count,
                 "description": "Agent repeatedly attempted actions that were denied by policy.",
                 "evidence": [

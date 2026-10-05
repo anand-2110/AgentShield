@@ -65,6 +65,18 @@
                 "category": "DATA_ACCESS",
                 "severity": "HIGH",
                 "confidence": 0.90
+            },
+
+            "DENIED_ACTION": {
+                "category": "POLICY_VIOLATION",
+                "severity": "MEDIUM",
+                "confidence": 1.0
+            },
+
+            "REPEATED_DENIALS": {
+                "category": "POLICY_VIOLATION",
+                "severity": "HIGH",
+                "confidence": 1.0
             }
         }
     },
