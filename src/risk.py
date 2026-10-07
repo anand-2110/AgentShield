@@ -142,8 +142,14 @@ class RiskEngine:
                 
         return risk
 
-    def assess_agent_risk(self, findings):
-        return self.assess_behavior(findings)
+    def assess_agent_risk(self, findings, correlations=None):
+        risk = self.assess_behavior(findings)
+
+        if correlations:
+            for correlation in correlations:
+                risk += correlation.get("risk_bonus", 0)
+
+        return risk
 
     def assess_incident(self, actions, behavior_risk):
         action_risks = []

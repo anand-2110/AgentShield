@@ -12,6 +12,7 @@ from incident import IncidentManager
 from agent_config import AgentConfigLoader
 from incident_summary import IncidentSummary
 from datetime import datetime, timedelta
+from correlation import CorrelationEngine
  
 #initializing modules.
 run_id = str(uuid.uuid4())
@@ -33,6 +34,9 @@ logger = EventLogger()
 risk_engine = RiskEngine("configs/risk_rules.json")
 behavior_analyzer = BehaviorAnalyzer("configs/risk_rules.json")
 storage = EventStorage()
+correlation_engine = CorrelationEngine(
+    risk_engine.rules
+)
 incident_manager = IncidentManager()
 summary_generator = IncidentSummary()
 
@@ -80,7 +84,7 @@ for action in actions:
             print(f"- {factor['type']}: +{factor['risk']}")
 
 print("\nIncidents:")
-
+#incidenents
 for incident in incident_manager.get_incidents():
 
     incident_findings = behavior_analyzer.analyze_events(
@@ -99,13 +103,18 @@ for incident in incident_manager.get_incidents():
         incident_findings
     )
 
+    correlations = correlation_engine.correlate(
+    incident_findings
+    )
+
     incident.findings = incident_findings
     incident.risk_factors = risk_engine.explain_incident(
         incident.events
     )
 
-    behavior_risk = risk_engine.assess_behavior(
-        incident_findings
+    behavior_risk = risk_engine.assess_agent_risk(
+        incident_findings,
+        correlations
     )
 
     incident_risk = risk_engine.assess_incident(
@@ -165,6 +174,15 @@ for incident in incident_manager.get_incidents():
             if "destination" in finding:
                 print(f"  Destination: {finding['destination']}")
 
+    if correlations:
+        print("Correlations:")
+
+        for correlation in correlations:
+            print(
+                f"- {correlation['type']} "
+                f"(+{correlation['risk_bonus']} risk)"
+            )
+
     if incident.risk_factors:
         print("Risk factors:")
         for factor in incident.risk_factors:
@@ -181,6 +199,7 @@ for incident in incident_manager.get_incidents():
 
 print("\nAgent behavior:")
 
+#findings
 for agent in agents:
     current_events = [
         event
@@ -204,10 +223,26 @@ for agent in agents:
         findings
     )
 
-    behavior_risk = risk_engine.assess_behavior(findings)
+    correlations = correlation_engine.correlate(
+        findings
+    )
+
+    behavior_risk = risk_engine.assess_agent_risk(
+        findings,
+        correlations
+    )
 
     print(f"\n{agent.name}")
     print("Behavior findings:")
+
+    if correlations:
+        print("Correlations:")
+
+        for correlation in correlations:
+            print(
+                f"- {correlation['type']} "
+                f"(+{correlation['risk_bonus']} risk)"
+            )
 
     for finding in findings:
         print(finding)
@@ -231,7 +266,6 @@ for agent in agents:
     historical_findings = []
 
     for historical_run in historical_runs:
-
         run_findings = behavior_analyzer.analyze_events(
             historical_run,
             agent.name
@@ -248,16 +282,23 @@ for agent in agents:
 
         historical_findings.extend(run_findings)
 
-        historical_findings = behavior_analyzer.consolidate_findings(
-            historical_findings
-        )
 
-        historical_findings = behavior_analyzer.apply_confidence(
-            historical_findings
-        )
+    historical_findings = behavior_analyzer.consolidate_findings(
+        historical_findings
+    )
+
+    historical_findings = behavior_analyzer.apply_confidence(
+        historical_findings
+    )
+
+
+    historical_correlations = correlation_engine.correlate(
+        historical_findings
+    )
 
     historical_risk = risk_engine.assess_agent_risk(
-        historical_findings
+        historical_findings,
+        historical_correlations
     )
 
     agent_risk = behavior_risk + historical_risk

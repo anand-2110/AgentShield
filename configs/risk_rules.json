@@ -152,5 +152,17 @@
             "description": "Source code or configuration data was followed by external network communication.",
             "within_seconds": 30
         }
+    },
+
+    "correlations": {
+        "policy_to_privilege": {
+            "findings": [
+                "REPEATED_DENIALS",
+                "PRIVILEGE_EXTERNAL_COMMUNICATION"
+            ],
+            "risk_bonus": 20,
+            "severity": "CRITICAL",
+            "description": "Repeated policy violations were followed by privileged external communication."
+        }
     }
 }
