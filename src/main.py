@@ -244,23 +244,17 @@ for agent in agents:
             )
         )
 
-        run_findings.extend(
-            run_sequence_findings
-        )
+        run_findings.extend(run_sequence_findings)
 
-        run_findings = behavior_analyzer.apply_confidence(
-            run_findings
-        )
+        historical_findings.extend(run_findings)
 
-        historical_findings.extend(
-            run_findings
-        )
-
-    historical_findings = (
-        behavior_analyzer.consolidate_findings(
+        historical_findings = behavior_analyzer.consolidate_findings(
             historical_findings
         )
-    )
+
+        historical_findings = behavior_analyzer.apply_confidence(
+            historical_findings
+        )
 
     historical_risk = risk_engine.assess_agent_risk(
         historical_findings
@@ -285,6 +279,5 @@ for agent in agents:
 print("\nBehavior history:")
 for event in behavior_analyzer.get_events():
     print(event)
-
 
 logger.show_events()

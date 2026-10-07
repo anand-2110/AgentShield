@@ -12,7 +12,7 @@ class BehaviorAnalyzer:
             self.rules = json.load(file)
 
         self.events = []
-        self.confidence_engine = ConfidenceEngine()
+        self.confidence_engine = ConfidenceEngine(self.rules)
 
     def record(self, action):
         self.events.append(action)
