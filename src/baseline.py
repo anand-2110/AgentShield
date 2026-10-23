@@ -83,6 +83,13 @@ class BaselineEngine:
                 "baseline_mature": (
                     total_events >= self.minimum_events
                 ),
+                
+                "events_per_second": (
+                    total_events / observation_seconds
+                    if observation_seconds > 0
+                    else None
+                ),
+
             }
 
         return baselines
