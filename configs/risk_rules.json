@@ -4,6 +4,11 @@
     "external_communication": 30,
     "privilege_escalation": 50,
 
+    "baseline": {
+    "lookback_seconds": 604800,
+    "minimum_events": 10
+    },
+
     "behavior": {
         "historical_behavior": {
             "within_seconds": 3600

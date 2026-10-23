@@ -1,18 +1,20 @@
 #This makes everything work together.
 
 #modules required
-import uuid
-from risk import RiskEngine
 from agent import SimulatedAgent
-from policy import PolicyEngine
-from logger import EventLogger
-from storage import EventStorage
-from behavior import BehaviorAnalyzer
-from incident import IncidentManager
 from agent_config import AgentConfigLoader
-from incident_summary import IncidentSummary
-from datetime import datetime, timedelta
+from baseline import BaselineEngine
+from baseline_detector import BaselineDetector
+from behavior import BehaviorAnalyzer
 from correlation import CorrelationEngine
+from datetime import datetime, timedelta
+from incident import IncidentManager
+from incident_summary import IncidentSummary
+from logger import EventLogger
+from policy import PolicyEngine
+from risk import RiskEngine
+from storage import EventStorage
+import uuid
  
 #initializing modules.
 run_id = str(uuid.uuid4())
@@ -34,6 +36,16 @@ logger = EventLogger()
 risk_engine = RiskEngine("configs/risk_rules.json")
 behavior_analyzer = BehaviorAnalyzer("configs/risk_rules.json")
 storage = EventStorage()
+baseline_config = risk_engine.rules["baseline"]
+baseline_engine = BaselineEngine(
+    minimum_events=baseline_config["minimum_events"]
+)
+
+baseline_detector = BaselineDetector(
+    volume_multiplier=3.0,
+    minimum_baseline_events=10,
+    window_seconds=60,
+)
 correlation_engine = CorrelationEngine(
     risk_engine.rules
 )
@@ -41,6 +53,87 @@ incident_manager = IncidentManager()
 summary_generator = IncidentSummary()
 
 actions = []
+
+
+def get_baseline_findings(agent_name, current_events):
+    if not current_events:
+        return []
+
+    baseline_lookback = (
+    risk_engine.rules["baseline"]["lookback_seconds"]
+    )
+
+    baseline_since = datetime.now() - timedelta(
+        seconds=baseline_lookback
+    )
+
+    historical_events = storage.get_events(
+        agent_name=agent_name,
+        exclude_run_id=run_id,
+        since=baseline_since,
+    )
+
+    baseline = baseline_engine.build(
+        historical_events
+    ).get(agent_name)
+
+    if not baseline or not baseline["baseline_mature"]:
+        return []
+
+    findings = []
+    seen = set()
+
+    # Detect unfamiliar actions and resources.
+    for event in current_events:
+        event_findings = baseline_detector.detect(
+            event, baseline
+        )
+
+        for finding in event_findings:
+            evidence = finding.get("evidence", {})
+
+            key = (
+                finding["type"],
+                evidence.get("action_type"),
+                evidence.get("resource"),
+            )
+
+            if key not in seen:
+                seen.add(key)
+                findings.append(finding)
+
+    # Count events in the configured recent window.
+    window_end = max(
+        event.timestamp for event in current_events
+    )
+    window_start = window_end - timedelta(
+        seconds=baseline_detector.window_seconds
+    )
+
+    recent_event_count = sum(
+        window_start <= event.timestamp <= window_end
+        for event in current_events
+    )
+
+    last_event = max(
+        current_events,
+        key=lambda event: event.timestamp,
+    )
+
+    volume_findings = baseline_detector.detect(
+        last_event,
+        baseline,
+        recent_event_count,
+    )
+
+    findings.extend(
+        finding
+        for finding in volume_findings
+        if finding["type"] == "EXCESSIVE_ACTIVITY"
+    )
+
+    return findings
+
 
 for agent in agents:
     scenario = config_loader.get_scenario(
@@ -98,6 +191,13 @@ for incident in incident_manager.get_incidents():
     )
 
     incident_findings.extend(sequence_findings)
+
+    baseline_findings = get_baseline_findings(
+        incident.agent_name,
+        incident.events,
+    )
+
+    incident_findings.extend(baseline_findings)
 
     incident_findings = behavior_analyzer.apply_confidence(
         incident_findings
@@ -218,6 +318,13 @@ for agent in agents:
     )
 
     findings.extend(sequence_findings)
+
+    baseline_findings = get_baseline_findings(
+        agent.name,
+        current_events,
+    )
+
+    findings.extend(baseline_findings)
 
     findings = behavior_analyzer.apply_confidence(
         findings
