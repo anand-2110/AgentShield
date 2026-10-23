@@ -77,6 +77,27 @@
                 "category": "POLICY_VIOLATION",
                 "severity": "HIGH",
                 "confidence": 1.0
+            },
+
+            "UNUSUAL_ACTION": {
+                "risk": 20,
+                "category": "BEHAVIORAL_ANOMALY",
+                "severity": "MEDIUM",
+                "confidence": 0.50
+            },
+
+            "UNUSUAL_RESOURCE": {
+                "risk": 25,
+                "category": "BEHAVIORAL_ANOMALY",
+                "severity": "MEDIUM",
+                "confidence": 0.50
+            },
+            
+            "EXCESSIVE_ACTIVITY": {
+                "risk": 35,
+                "category": "BEHAVIORAL_ANOMALY",
+                "severity": "HIGH",
+                "confidence": 0.50
             }
         }
     },
