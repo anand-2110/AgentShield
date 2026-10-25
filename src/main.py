@@ -157,17 +157,27 @@ for agent in agents:
 
         actions.append(action)
 
+
 for action in actions:
     action.result = policy_engine.check(action)
     behavior_analyzer.record(action)
-    storage.save_event(run_id, action)
-    incident_manager.add_event(action)
+
+    incident = incident_manager.add_event(action)
+
+    storage.save_event(
+        run_id,
+        action,
+        incident_id=incident.incident_id
+    )
+
+    logger.log(
+        action,
+        incident_id=incident.incident_id
+    )
 
     risk_score = risk_engine.assess(action)
     risk_level = risk_engine.severity(risk_score)
     risk_factors = risk_engine.explain(action)
-
-    logger.log(action)
 
     print(f"Risk: {risk_score} ({risk_level})")
 

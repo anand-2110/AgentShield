@@ -1,7 +1,10 @@
 #SQL and database storage.
 import sqlite3
 from datetime import datetime
-from action import AgentAction
+try:
+    from .action import AgentAction
+except ImportError:
+    from action import AgentAction
 
 class EventStorage:
     def __init__(self, database_file="agentshield.db"):
@@ -23,33 +26,50 @@ class EventStorage:
             )
         """)
 
+        # Upgrade existing databases without deleting stored events.
+        columns = {
+            row[1]
+            for row in connection.execute(
+                "PRAGMA table_info(events)"
+            ).fetchall()
+        }
+
+        if "incident_id" not in columns:
+            connection.execute(
+                "ALTER TABLE events ADD COLUMN incident_id TEXT"
+            )
+
         connection.commit()
         connection.close()
 
-    def save_event(self, run_id, action):
+    def save_event(self, run_id, action, incident_id=None):
         connection = sqlite3.connect(self.database_file)
 
-        connection.execute("""
-            INSERT INTO events (
+        try:
+            connection.execute("""
+                INSERT INTO events (
+                    run_id,
+                    agent_name,
+                    action_type,
+                    resource,
+                    timestamp,
+                    result,
+                    incident_id
+                )
+                VALUES (?, ?, ?, ?, ?, ?, ?)
+            """, (
                 run_id,
-                agent_name,
-                action_type,
-                resource,
-                timestamp,
-                result
-            )
-            VALUES (?, ?, ?, ?, ?, ?)
-        """, (
-            run_id,
-            action.agent_name,
-            action.action_type,
-            action.resource,
-            action.timestamp.isoformat(),
-            action.result
-        ))
+                action.agent_name,
+                action.action_type,
+                action.resource,
+                action.timestamp.isoformat(),
+                action.result,
+                incident_id
+            ))
 
-        connection.commit()
-        connection.close()
+            connection.commit()
+        finally:
+            connection.close()
 
     def get_events(self, agent_name=None, run_id=None, exclude_run_id=None, since=None):
         connection = sqlite3.connect(self.database_file)
@@ -171,4 +191,26 @@ class EventStorage:
             runs[run_id].append(event)
 
         return list(runs.values())
-    
+
+    def get_event_records(self, run_id=None):
+        connection = sqlite3.connect(self.database_file)
+        connection.row_factory = sqlite3.Row
+
+        try:
+            if run_id is not None:
+                cursor = connection.execute("""
+                    SELECT *
+                    FROM events
+                    WHERE run_id = ?
+                    ORDER BY id
+                """, (run_id,))
+            else:
+                cursor = connection.execute("""
+                    SELECT *
+                    FROM events
+                    ORDER BY id
+                """)
+
+            return [dict(row) for row in cursor.fetchall()]
+        finally:
+            connection.close()
