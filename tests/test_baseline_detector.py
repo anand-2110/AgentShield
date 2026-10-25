@@ -126,7 +126,7 @@ def test_excessive_activity():
     findings = detector.detect(
         make_event(),
         baseline,
-        recent_event_count=4,
+        recent_event_count=5,
     )
 
     assert any(
