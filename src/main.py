@@ -408,7 +408,21 @@ for agent in agents:
         historical_correlations
     )
 
-    agent_risk = behavior_risk + historical_risk
+    current_incident_risks = [
+        incident.incident_risk
+        for incident in incident_manager.get_incidents()
+        if incident.agent_name == agent.name
+    ]
+
+    agent_risk = risk_engine.assess_overall_agent_risk(
+        current_incident_risks,
+        historical_risk
+    )
+
+    highest_incident_risk = max(
+        current_incident_risks,
+        default=0
+    )
 
     agent_risk_level = risk_engine.severity(agent_risk)
 
@@ -417,6 +431,7 @@ for agent in agents:
     for finding in historical_findings:
         print(finding)
 
+    print(f"Highest current incident risk: {highest_incident_risk}")
     print(f"Historical behavior risk: {historical_risk}")
 
     print(

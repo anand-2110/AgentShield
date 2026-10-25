@@ -152,11 +152,26 @@ class RiskEngine:
         return risk
 
     def assess_incident(self, actions, behavior_risk):
-        action_risks = []
-
-        for action in actions:
-            action_risks.append(self.assess(action))
+        action_risks = [
+            self.assess(action)
+            for action in actions
+        ]
 
         highest_action_risk = max(action_risks, default=0)
 
-        return highest_action_risk + behavior_risk
+        return min(100, highest_action_risk + behavior_risk)
+
+    def assess_overall_agent_risk(
+        self,
+        incident_risks,
+        historical_risk=0
+    ):
+        highest_incident_risk = max(
+            incident_risks,
+            default=0
+        )
+
+        return min(
+            100,
+            highest_incident_risk + historical_risk
+        )

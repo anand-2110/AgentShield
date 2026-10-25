@@ -36,3 +36,34 @@ def test_correlation_bonus_is_added_to_agent_risk():
     assert risk_engine.assess_agent_risk(
         findings, correlations
     ) == 40
+
+
+def test_agent_risk_uses_highest_incident_plus_history():
+    risk_engine = RiskEngine("configs/risk_rules.json")
+
+    result = risk_engine.assess_overall_agent_risk(
+        incident_risks=[40, 70, 30],
+        historical_risk=10
+    )
+
+    assert result == 80
+
+def test_agent_risk_without_incidents_uses_history():
+    risk_engine = RiskEngine("configs/risk_rules.json")
+
+    result = risk_engine.assess_overall_agent_risk(
+        incident_risks=[],
+        historical_risk=30
+    )
+
+    assert result == 30
+
+def test_overall_agent_risk_is_capped_at_100():
+    risk_engine = RiskEngine("configs/risk_rules.json")
+
+    result = risk_engine.assess_overall_agent_risk(
+        incident_risks=[80],
+        historical_risk=30
+    )
+
+    assert result == 100
