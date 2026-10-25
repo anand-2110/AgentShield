@@ -130,3 +130,93 @@ def test_existing_database_gets_incident_id_column(tmp_path):
     assert len(records) == 1
     assert records[0]["agent_name"] == "Legacy-Agent"
     assert records[0]["incident_id"] is None
+
+
+def test_get_incident_summaries_groups_by_run_and_incident(storage):
+    """The same incident ID in separate runs must remain separate."""
+    storage.save_event(
+        "run-A",
+        make_action(agent_name="Agent-A", result="DENIED"),
+        incident_id="INC-0001",
+    )
+    storage.save_event(
+        "run-A",
+        make_action(agent_name="Agent-A", result="ALLOWED"),
+        incident_id="INC-0001",
+    )
+    storage.save_event(
+        "run-B",
+        make_action(agent_name="Agent-B", result="DENIED"),
+        incident_id="INC-0001",
+    )
+
+    summaries = storage.get_incident_summaries()
+
+    assert len(summaries) == 2
+
+    by_run = {item["run_id"]: item for item in summaries}
+
+    assert by_run["run-A"]["incident_id"] == "INC-0001"
+    assert by_run["run-A"]["agent_name"] == "Agent-A"
+    assert by_run["run-A"]["event_count"] == 2
+    assert by_run["run-A"]["denied_count"] == 1
+
+    assert by_run["run-B"]["incident_id"] == "INC-0001"
+    assert by_run["run-B"]["agent_name"] == "Agent-B"
+    assert by_run["run-B"]["event_count"] == 1
+    assert by_run["run-B"]["denied_count"] == 1
+
+
+def test_get_incident_records_returns_only_matching_incident(storage):
+    storage.save_event(
+        "run-A",
+        make_action(action_type="READ_DATABASE"),
+        incident_id="INC-0001",
+    )
+    storage.save_event(
+        "run-A",
+        make_action(action_type="READ_FILE", result="DENIED"),
+        incident_id="INC-0001",
+    )
+    storage.save_event(
+        "run-A",
+        make_action(action_type="NETWORK_CONNECT"),
+        incident_id="INC-0002",
+    )
+    storage.save_event(
+        "run-B",
+        make_action(action_type="READ_FILE"),
+        incident_id="INC-0001",
+    )
+
+    records = storage.get_incident_records("INC-0001", "run-A")
+
+    assert len(records) == 2
+    assert [r["action_type"] for r in records] == [
+        "READ_DATABASE",
+        "READ_FILE",
+    ]
+    assert all(r["incident_id"] == "INC-0001" for r in records)
+    assert all(r["run_id"] == "run-A" for r in records)
+
+
+def test_get_incident_records_returns_empty_for_unknown_incident(storage):
+    records = storage.get_incident_records("INC-9999", "run-missing")
+
+    assert records == []
+
+
+@pytest.mark.parametrize(
+    ("incident_id", "run_id"),
+    [
+        ("", "run-A"),
+        ("INC-0001", ""),
+        (None, "run-A"),
+        ("INC-0001", None),
+    ],
+)
+def test_get_incident_records_requires_both_ids(
+    storage, incident_id, run_id
+):
+    with pytest.raises(ValueError):
+        storage.get_incident_records(incident_id, run_id)

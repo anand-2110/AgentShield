@@ -214,3 +214,53 @@ class EventStorage:
             return [dict(row) for row in cursor.fetchall()]
         finally:
             connection.close()
+
+
+    def get_incident_summaries(self):
+        """Return historical incident summaries, separated by run."""
+        connection = sqlite3.connect(self.database_file)
+        connection.row_factory = sqlite3.Row
+
+        try:
+            cursor = connection.execute("""
+                SELECT
+                    run_id,
+                    incident_id,
+                    agent_name,
+                    MIN(timestamp) AS start_time,
+                    MAX(timestamp) AS end_time,
+                    COUNT(*) AS event_count,
+                    SUM(
+                        CASE WHEN result = 'DENIED'
+                        THEN 1 ELSE 0 END
+                    ) AS denied_count
+                FROM events
+                WHERE incident_id IS NOT NULL
+                GROUP BY run_id, incident_id, agent_name
+                ORDER BY MAX(timestamp) DESC, run_id
+            """)
+
+            return [dict(row) for row in cursor.fetchall()]
+        finally:
+            connection.close()
+
+    def get_incident_records(self, incident_id, run_id):
+        """Return the timeline for one incident in one run."""
+        if not incident_id or not run_id:
+            raise ValueError("Both incident_id and run_id are required.")
+
+        connection = sqlite3.connect(self.database_file)
+        connection.row_factory = sqlite3.Row
+
+        try:
+            cursor = connection.execute("""
+                SELECT *
+                FROM events
+                WHERE incident_id = ?
+                  AND run_id = ?
+                ORDER BY timestamp, id
+            """, (incident_id, run_id))
+
+            return [dict(row) for row in cursor.fetchall()]
+        finally:
+            connection.close()
