@@ -220,3 +220,61 @@ def test_get_incident_records_requires_both_ids(
 ):
     with pytest.raises(ValueError):
         storage.get_incident_records(incident_id, run_id)
+
+
+
+def test_get_incident_summaries_filters_by_agent(storage):
+    storage.save_event(
+        "run-A",
+        make_action(agent_name="Database-Agent", result="DENIED"),
+        incident_id="INC-0001",
+    )
+    storage.save_event(
+        "run-A",
+        make_action(agent_name="Code-Agent", result="ALLOWED"),
+        incident_id="INC-0002",
+    )
+
+    summaries = storage.get_incident_summaries(
+        agent_name="Database-Agent"
+    )
+
+    assert len(summaries) == 1
+    assert summaries[0]["agent_name"] == "Database-Agent"
+
+
+def test_get_incident_summaries_filters_denied_only(storage):
+    storage.save_event(
+        "run-A",
+        make_action(agent_name="Database-Agent", result="DENIED"),
+        incident_id="INC-0001",
+    )
+    storage.save_event(
+        "run-A",
+        make_action(agent_name="Code-Agent", result="ALLOWED"),
+        incident_id="INC-0002",
+    )
+
+    summaries = storage.get_incident_summaries(denied_only=True)
+
+    assert len(summaries) == 1
+    assert summaries[0]["incident_id"] == "INC-0001"
+    assert summaries[0]["denied_count"] > 0
+
+
+def test_get_incident_summaries_filters_by_run(storage):
+    storage.save_event(
+        "run-A",
+        make_action(agent_name="Agent-A"),
+        incident_id="INC-0001",
+    )
+    storage.save_event(
+        "run-B",
+        make_action(agent_name="Agent-B"),
+        incident_id="INC-0002",
+    )
+
+    summaries = storage.get_incident_summaries(run_id="run-A")
+
+    assert len(summaries) == 1
+    assert summaries[0]["run_id"] == "run-A"

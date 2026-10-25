@@ -216,13 +216,18 @@ class EventStorage:
             connection.close()
 
 
-    def get_incident_summaries(self):
-        """Return historical incident summaries, separated by run."""
+    def get_incident_summaries(
+        self,
+        agent_name=None,
+        run_id=None,
+        denied_only=False,
+    ):
+        """Return historical incident summaries with optional filters."""
         connection = sqlite3.connect(self.database_file)
         connection.row_factory = sqlite3.Row
 
         try:
-            cursor = connection.execute("""
+            query = """
                 SELECT
                     run_id,
                     incident_id,
@@ -236,13 +241,38 @@ class EventStorage:
                     ) AS denied_count
                 FROM events
                 WHERE incident_id IS NOT NULL
-                GROUP BY run_id, incident_id, agent_name
-                ORDER BY MAX(timestamp) DESC, run_id
-            """)
+            """
 
+            parameters = []
+
+            if agent_name:
+                query += " AND agent_name = ?"
+                parameters.append(agent_name)
+
+            if run_id:
+                query += " AND run_id = ?"
+                parameters.append(run_id)
+
+            query += """
+                GROUP BY run_id, incident_id, agent_name
+            """
+
+            if denied_only:
+                query += """
+                    HAVING SUM(
+                        CASE WHEN result = 'DENIED'
+                        THEN 1 ELSE 0 END
+                    ) > 0
+                """
+
+            query += " ORDER BY MAX(timestamp) DESC, run_id"
+
+            cursor = connection.execute(query, parameters)
             return [dict(row) for row in cursor.fetchall()]
+
         finally:
             connection.close()
+
 
     def get_incident_records(self, incident_id, run_id):
         """Return the timeline for one incident in one run."""
