@@ -10,7 +10,18 @@ class BaselineDetector:
         volume_multiplier=3.0,
         minimum_baseline_events=10,
         window_seconds=60,
+        minimum_activity_events=5,
     ):
+        if (
+            isinstance(minimum_activity_events, bool)
+            or not isinstance(minimum_activity_events, int)
+            or minimum_activity_events < 1
+        ):
+            raise ValueError(
+                "minimum_activity_events must be a positive integer"
+            )
+
+        self.minimum_activity_events = minimum_activity_events
         if (
             isinstance(volume_multiplier, bool)
             or not isinstance(volume_multiplier, (int, float))
@@ -103,10 +114,12 @@ class BaselineDetector:
                     * self.window_seconds
                     / observation_seconds
                 )
-
                 threshold = expected_count * self.volume_multiplier
 
-                if recent_event_count > threshold:
+                if (
+                    recent_event_count >= self.minimum_activity_events
+                    and recent_event_count > threshold
+                ):
                     findings.append({
                         "type": "EXCESSIVE_ACTIVITY",
                         "agent": agent_name,

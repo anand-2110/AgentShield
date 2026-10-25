@@ -40,11 +40,11 @@ baseline_config = risk_engine.rules["baseline"]
 baseline_engine = BaselineEngine(
     minimum_events=baseline_config["minimum_events"]
 )
-
 baseline_detector = BaselineDetector(
     volume_multiplier=3.0,
-    minimum_baseline_events=10,
+    minimum_baseline_events=baseline_config["minimum_events"],
     window_seconds=60,
+    minimum_activity_events=baseline_config["minimum_activity_events"],
 )
 correlation_engine = CorrelationEngine(
     risk_engine.rules

@@ -5,8 +5,9 @@
     "privilege_escalation": 50,
 
     "baseline": {
-    "lookback_seconds": 604800,
-    "minimum_events": 10
+        "lookback_seconds": 604800,
+        "minimum_events": 10,
+        "minimum_activity_events": 5
     },
 
     "behavior": {
@@ -97,7 +98,7 @@
                 "severity": "MEDIUM",
                 "confidence": 0.50
             },
-            
+
             "EXCESSIVE_ACTIVITY": {
                 "risk": 35,
                 "category": "BEHAVIORAL_ANOMALY",
